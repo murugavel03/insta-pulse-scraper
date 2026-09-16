@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IG Lead Scraper — Find Business Contacts from Instagram Reels</title>
+  <meta name="description" content="Extract business leads, phone numbers, and websites from Instagram Reel comments. Export to Excel instantly." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0a0f; --surface: #12121a; --surface2: #1a1a28; --surface3: #20203a;
+      --border: rgba(99,102,241,.25); --indigo: #6366f1; --indigo-dim: #4f46e5;
+      --violet: #8b5cf6; --pink: #ec4899; --green: #22c55e; --red: #ef4444;
+      --amber: #f59e0b; --text: #f1f5f9; --muted: #94a3b8; --radius: 14px;
+      --transition: .25s cubic-bezier(.4,0,.2,1);
+    }
+    body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: -1;
+      background: radial-gradient(ellipse 80% 60% at 20% 10%, rgba(99,102,241,.18) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 80%, rgba(139,92,246,.14) 0%, transparent 55%), var(--bg);
+    }
+    .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+    .container-wide { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; border-bottom: 1px solid var(--border); }
+    .logo { display: flex; align-items: center; gap: 10px; font-size: 1.2rem; font-weight: 700; }
+    .logo-icon { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, var(--indigo), var(--violet)); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .badge { background: rgba(99,102,241,.15); border: 1px solid rgba(99,102,241,.3); color: var(--indigo); font-size: .72rem; font-weight: 600; letter-spacing: .5px; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; }
+    .hero { text-align: center; padding: 50px 0 36px; }
+    .hero-tag { display: inline-flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 600; letter-spacing: .8px; text-transform: uppercase; color: var(--indigo); background: rgba(99,102,241,.12); border: 1px solid rgba(99,102,241,.25); padding: 5px 14px; border-radius: 20px; margin-bottom: 20px; }
+    .hero h1 { font-size: clamp(1.8rem, 5vw, 3rem); font-weight: 800; line-height: 1.15; letter-spacing: -1px; margin-bottom: 14px; }
+    .hero h1 span { background: linear-gradient(135deg, var(--indigo), var(--violet), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero p { font-size: 1rem; color: var(--muted); max-width: 520px; margin: 0 auto 32px; line-height: 1.7; }
+    .stats-row { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; margin-bottom: 40px; }
+    .stat { text-align: center; }
+    .stat-value { font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, var(--indigo), var(--violet)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .stat-label { font-size: .75rem; color: var(--muted); margin-top: 2px; }
+    .steps { display: flex; align-items: center; margin-bottom: 28px; }
+    .step { display: flex; align-items: center; gap: 8px; font-size: .82rem; font-weight: 500; color: var(--muted); }
+    .step-num { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--border); font-size: .75rem; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all var(--transition); }
+    .step.active .step-num { border-color: var(--indigo); background: rgba(99,102,241,.15); color: var(--indigo); }
+    .step.done .step-num { border-color: var(--green); background: rgba(34,197,94,.15); color: var(--green); }
+    .step.active { color: var(--text); }
+    .step-line { flex: 1; height: 1px; background: var(--border); margin: 0 10px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 32px; margin-bottom: 20px; transition: border-color var(--transition); }
+    .card:hover { border-color: rgba(99,102,241,.4); }
+    .card-title { font-size: .72rem; font-weight: 600; letter-spacing: .8px; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+    .card-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: .83rem; font-weight: 500; color: var(--muted); margin-bottom: 7px; }
+    input[type="text"], input[type="password"], input[type="url"], input[type="number"] {
+      width: 100%; padding: 11px 15px; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text); font-family: inherit; font-size: .92rem;
+      outline: none; transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    input:focus { border-color: var(--indigo); box-shadow: 0 0 0 3px rgba(99,102,241,.15); }
+    .session-input { font-family: 'JetBrains Mono', monospace !important; font-size: .8rem !important; letter-spacing: .5px; color: #a5b4fc !important; }
+    .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 24px; border-radius: 10px; font-family: inherit; font-size: .9rem; font-weight: 600; cursor: pointer; transition: all var(--transition); border: none; }
+    .btn-primary { background: linear-gradient(135deg, var(--indigo-dim), var(--indigo)); color: #fff; box-shadow: 0 4px 20px rgba(99,102,241,.35); }
+    .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(99,102,241,.45); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+    .btn-secondary { background: var(--surface2); border: 1px solid var(--border); color: var(--text); }
+    .btn-secondary:hover { border-color: var(--indigo); }
+    .btn-success { background: linear-gradient(135deg, #16a34a, #22c55e); color: #fff; box-shadow: 0 4px 20px rgba(34,197,94,.3); }
+    .btn-success:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(34,197,94,.4); }
+    .btn-lg { padding: 14px 32px; font-size: 1rem; border-radius: 12px; }
+    .btn-full { width: 100%; }
+
+    /* How-to steps */
+    .how-to { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-bottom: 20px; }
+    .how-to-title { font-size: .82rem; font-weight: 700; color: var(--indigo); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+    .how-to-steps { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .how-to-steps li { display: flex; align-items: flex-start; gap: 10px; font-size: .84rem; color: var(--muted); line-height: 1.5; }
+    .how-to-steps li .step-badge { background: linear-gradient(135deg, var(--indigo-dim), var(--indigo)); color: #fff; font-size: .7rem; font-weight: 700; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .how-to-steps li strong { color: var(--text); }
+    .kbd { display: inline-block; background: var(--surface3); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; font-family: 'JetBrains Mono', monospace; font-size: .75rem; color: var(--indigo); }
+
+    .progress-wrap { background: var(--surface2); border-radius: 20px; height: 8px; overflow: hidden; margin: 16px 0; }
+    .progress-bar { height: 100%; border-radius: 20px; background: linear-gradient(90deg, var(--indigo-dim), var(--violet), var(--pink)); background-size: 200% 100%; animation: shimmer 1.5s linear infinite; transition: width .5s ease; width: 0%; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .progress-msg { font-size: .82rem; color: var(--muted); margin-top: 6px; display: flex; justify-content: space-between; }
+    .alert { padding: 12px 16px; border-radius: 10px; font-size: .86rem; display: flex; align-items: flex-start; gap: 10px; margin: 12px 0; }
+    .alert-error  { background: rgba(239,68,68,.1);  border: 1px solid rgba(239,68,68,.25);  color: #fca5a5; }
+    .alert-success{ background: rgba(34,197,94,.1);  border: 1px solid rgba(34,197,94,.25);  color: #86efac; }
+    .alert-info   { background: rgba(99,102,241,.1); border: 1px solid rgba(99,102,241,.25); color: #a5b4fc; }
+    .alert-warn   { background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.25); color: #fcd34d; }
+    .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+    .results-count { font-size: .85rem; font-weight: 600; background: rgba(99,102,241,.15); border: 1px solid rgba(99,102,241,.3); color: var(--indigo); padding: 4px 12px; border-radius: 20px; }
+    .search-input { max-width: 260px; padding: 8px 14px !important; }
+
+    /* Lead Cards Grid */
+    .leads-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
+    .lead-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; transition: border-color var(--transition), transform var(--transition); }
+    .lead-card:hover { border-color: rgba(99,102,241,.5); transform: translateY(-2px); }
+    .lead-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; gap: 10px; }
+    .lead-name { font-size: .95rem; font-weight: 700; line-height: 1.3; }
+    .lead-handle { font-size: .78rem; color: var(--indigo); font-weight: 500; margin-top: 2px; }
+    .score-pill { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-weight: 700; font-size: .75rem; white-space: nowrap; flex-shrink: 0; }
+    .score-high   { background: rgba(34,197,94,.15);  color: #86efac; }
+    .score-medium { background: rgba(245,158,11,.15); color: #fcd34d; }
+    .score-low    { background: rgba(99,102,241,.15); color: #a5b4fc; }
+
+    /* Lead card data rows */
+    .lead-fields { display: flex; flex-direction: column; gap: 8px; }
+    .lead-field { display: flex; align-items: flex-start; gap: 8px; font-size: .82rem; }
+    .lead-field-icon { font-size: .9rem; flex-shrink: 0; width: 20px; text-align: center; margin-top: 1px; }
+    .lead-field-label { font-size: .68rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; white-space: nowrap; flex-shrink: 0; width: 48px; margin-top: 2px; }
+    .lead-field-value { color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: .78rem; word-break: break-all; flex: 1; }
+    .lead-field-value a { color: #818cf8; text-decoration: none; }
+    .lead-field-value a:hover { text-decoration: underline; }
+    .lead-field-value.bio-val { font-family: inherit; font-size: .8rem; color: var(--muted); white-space: pre-wrap; word-break: break-word; line-height: 1.5; }
+    .field-dash { color: var(--muted); opacity: .4; }
+    .copy-btn { background: none; border: none; cursor: pointer; color: var(--muted); font-size: .7rem; padding: 1px 5px; border-radius: 4px; transition: color var(--transition); }
+    .copy-btn:hover { color: var(--text); }
+    .lead-divider { height: 1px; background: var(--border); margin: 10px 0; }
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+    .empty-icon { font-size: 3rem; margin-bottom: 16px; opacity: .4; }
+    .hidden { display: none !important; }
+    .logout-link { font-size: .8rem; color: var(--muted); cursor: pointer; text-decoration: underline; transition: color var(--transition); }
+    .logout-link:hover { color: var(--red); }
+    .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .logged-in-info { display: flex; align-items: center; gap: 10px; background: rgba(34,197,94,.08); border: 1px solid rgba(34,197,94,.2); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: .85rem; }
+    .logged-in-info span { color: #86efac; font-weight: 600; }
+    footer { text-align: center; color: var(--muted); font-size: .76rem; padding: 32px 0 24px; border-top: 1px solid var(--border); margin-top: 40px; }
+    @media (max-width: 600px) { .input-row { grid-template-columns: 1fr; } .card { padding: 20px 18px; } .hero { padding: 36px 0 24px; } }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <nav>
+    <div class="logo"><div class="logo-icon">📊</div> IG Lead Scraper</div>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <span class="badge">AI-Powered</span>
+      <span id="nav-user" class="hidden" style="font-size:.82rem;color:var(--green);font-weight:600;"></span>
+      <span id="nav-logout" class="hidden logout-link" onclick="logout()">🔴 Logout</span>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-tag">🚀 Business Lead Extraction</div>
+    <h1>Find <span>Business Contacts</span><br/>from Instagram Reels</h1>
+    <p>Paste any Instagram Reel URL. Our AI scans every comment, detects businesses, extracts phone numbers, emails &amp; websites — and exports to Excel in one click.</p>
+    <div class="stats-row">
+      <div class="stat"><div class="stat-value">500+</div><div class="stat-label">Comments Scanned</div></div>
+      <div class="stat"><div class="stat-value">AI</div><div class="stat-label">Business Detection</div></div>
+      <div class="stat"><div class="stat-value">.xlsx</div><div class="stat-label">Excel Export</div></div>
+    </div>
+  </section>
+
+  <div class="steps">
+    <div class="step active" id="step1"><div class="step-num" id="s1">1</div> Connect</div>
+    <div class="step-line"></div>
+    <div class="step" id="step2"><div class="step-num" id="s2">2</div> Scrape Reel</div>
+    <div class="step-line"></div>
+    <div class="step" id="step3"><div class="step-num" id="s3">3</div> Download Excel</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SECTION 1 — Session ID Login                               -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div id="section-login">
+    <div class="card">
+      <div class="card-title">🔐 Step 1 — Connect Your Instagram Account</div>
+
+      <div class="alert alert-info">
+        🔒 <div>We use your <strong>browser session cookie</strong> — no password needed! This is 100% safe and bypasses all Instagram challenges. Your session ID stays on your local PC only.</div>
+      </div>
+
+      <!-- How to get session ID -->
+      <div class="how-to">
+        <div class="how-to-title">📋 How to get your Instagram Session ID (30 seconds)</div>
+        <ol class="how-to-steps">
+          <li>
+            <div class="step-badge">1</div>
+            <div>Open <strong>instagram.com</strong> in Chrome and make sure you're <strong>logged in</strong></div>
+          </li>
+          <li>
+            <div class="step-badge">2</div>
+            <div>Press <span class="kbd">F12</span> to open Developer Tools (or right-click → Inspect)</div>
+          </li>
+          <li>
+            <div class="step-badge">3</div>
+            <div>Click the <strong>Application</strong> tab → expand <strong>Cookies</strong> in the left panel → click <strong>https://www.instagram.com</strong></div>
+          </li>
+          <li>
+            <div class="step-badge">4</div>
+            <div>Find the cookie named <span class="kbd">sessionid</span> → click on it → <strong>copy the Value</strong> (long string of letters and numbers)</div>
+          </li>
+          <li>
+            <div class="step-badge">5</div>
+            <div>Paste it in the box below and click <strong>Connect</strong></div>
+          </li>
+        </ol>
+      </div>
+
+      <div class="form-group">
+        <label for="ig-sessionid">Instagram Session ID <span style="color:var(--muted);font-weight:400;">(from browser cookies)</span></label>
+        <input id="ig-sessionid" type="text" class="session-input"
+          placeholder="57631892%3AbXyZ1234abcd…  (paste your sessionid here)" />
+      </div>
+
+      <div id="login-alert" class="hidden"></div>
+
+      <button id="login-btn" class="btn btn-primary btn-full btn-lg" onclick="doLogin()">
+        🔌 Connect to Instagram
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SECTION 2 — Scrape                                         -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div id="section-scrape" class="hidden">
+    <div class="card">
+      <div class="card-title">🎬 Step 2 — Paste Instagram Reel URL</div>
+
+      <div id="logged-in-banner" class="logged-in-banner hidden logged-in-info">
+        ✅ Connected as <span id="logged-in-user"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="reel-url">Instagram Reel / Post URL</label>
+        <input id="reel-url" type="url" placeholder="https://www.instagram.com/reel/ABC123xyz/" />
+      </div>
+      <div class="input-row">
+        <div class="form-group">
+          <label for="max-comments">Max Comments to Scan</label>
+          <input id="max-comments" type="number" value="300" min="10" max="2000" />
+        </div>
+        <div class="form-group">
+          <label for="min-confidence">Min Confidence Score (%)</label>
+          <input id="min-confidence" type="number" value="25" min="10" max="90" />
+        </div>
+      </div>
+
+      <div id="scrape-alert" class="hidden"></div>
+      <div id="progress-section" class="hidden">
+        <div class="progress-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+        <div class="progress-msg">
+          <span id="progress-msg-text">Initializing…</span>
+          <span id="progress-pct">0%</span>
+        </div>
+      </div>
+      <button id="scrape-btn" class="btn btn-primary btn-full btn-lg" onclick="doScrape()" style="margin-top:8px;">
+        🔍 Start Scraping
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- SECTION 3 — Results (wide layout)                          -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div id="section-results" class="hidden"></div>
+
+  <footer>Built with ❤️ for business lead generation &nbsp;·&nbsp; Runs 100% locally on your machine</footer>
+</div>
+
+<script>
+  const API = 'http://127.0.0.1:8000';
+  let sessionId = null, allLeads = [], pollTimer = null, currentReelUrl = '';
+
+  function setAlert(id, type, html) {
+    const el = document.getElementById(id);
+    el.className = `alert alert-${type}`;
+    el.innerHTML = html;
+    el.classList.remove('hidden');
+  }
+  function clearAlert(id) { const el = document.getElementById(id); el.classList.add('hidden'); el.innerHTML = ''; }
+  function showSection(id) {
+    ['section-login','section-scrape','section-results'].forEach(s =>
+      document.getElementById(s).classList.toggle('hidden', s !== id));
+  }
+  function setStep(n) {
+    for (let i = 1; i <= 3; i++) {
+      const s = document.getElementById(`step${i}`), num = document.getElementById(`s${i}`);
+      s.className = 'step';
+      if (i < n)        { s.classList.add('done');   num.textContent = '✓'; }
+      else if (i === n) { s.classList.add('active'); num.textContent = i; }
+      else              { num.textContent = i; }
+    }
+  }
+
+  // ── Login ──────────────────────────────────────────────────────
+
+  async function doLogin() {
+    const sid = document.getElementById('ig-sessionid').value.trim();
+    if (!sid) { setAlert('login-alert','error','❌ Please paste your Instagram Session ID.'); return; }
+    if (sid.length < 20) { setAlert('login-alert','error','❌ That doesn\'t look like a valid session ID. It should be a long string.'); return; }
+
+    clearAlert('login-alert');
+    const btn = document.getElementById('login-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Connecting…';
+
+    try {
+      const res  = await fetch(`${API}/api/login`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ sessionid: sid }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setAlert('login-alert','error','❌ ' + (data.detail || 'Connection failed.'));
+        btn.disabled = false;
+        btn.innerHTML = '🔌 Connect to Instagram';
+        return;
+      }
+
+      sessionId = data.session_id;
+      const username = data.username || 'Instagram User';
+
+      // Show logged-in state
+      document.getElementById('nav-user').textContent = `✅ @${username}`;
+      document.getElementById('nav-user').classList.remove('hidden');
+      document.getElementById('nav-logout').classList.remove('hidden');
+      document.getElementById('logged-in-user').textContent = `@${username}`;
+      document.getElementById('logged-in-banner').classList.remove('hidden');
+
+      setStep(2);
+      showSection('section-scrape');
+    } catch(e) {
+      setAlert('login-alert','error',
+        '❌ Cannot reach local server. Make sure <code>start.bat</code> is running, then refresh this page.');
+      btn.disabled = false;
+      btn.innerHTML = '🔌 Connect to Instagram';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('ig-sessionid').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+  });
+
+  // ── Scrape ─────────────────────────────────────────────────────
+
+  async function doScrape() {
+    const reelUrl     = document.getElementById('reel-url').value.trim();
+    const maxComments = parseInt(document.getElementById('max-comments').value) || 300;
+    const minConf     = parseInt(document.getElementById('min-confidence').value) || 25;
+
+    if (!reelUrl) { setAlert('scrape-alert','error','❌ Please paste an Instagram Reel URL.'); return; }
+    if (!reelUrl.includes('instagram.com')) { setAlert('scrape-alert','error','❌ That doesn\'t look like an Instagram URL.'); return; }
+
+    currentReelUrl = reelUrl;
+    clearAlert('scrape-alert');
+    const btn = document.getElementById('scrape-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Starting…';
+    document.getElementById('progress-section').classList.remove('hidden');
+    updateProgress('Starting scrape…', 2);
+
+    try {
+      const res = await fetch(`${API}/api/scrape`, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ session_id: sessionId, reel_url: reelUrl, max_comments: maxComments, min_confidence: minConf }),
+      });
+      if (!res.ok) { const d = await res.json(); setAlert('scrape-alert','error','❌ ' + (d.detail || 'Scrape failed.')); resetScrapeBtn(); return; }
+      pollTimer = setInterval(pollProgress, 1200);
+    } catch(e) { setAlert('scrape-alert','error','❌ Server error.'); resetScrapeBtn(); }
+  }
+
+  function updateProgress(msg, pct) {
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('progress-msg-text').textContent = msg;
+    document.getElementById('progress-pct').textContent = pct + '%';
+  }
+
+  async function pollProgress() {
+    try {
+      const res = await fetch(`${API}/api/progress/${sessionId}`);
+      const data = await res.json();
+      updateProgress(data.message || '…', data.percent || 0);
+      if (data.done) {
+        clearInterval(pollTimer);
+        if (data.error) { setAlert('scrape-alert','error','❌ ' + data.error); resetScrapeBtn(); }
+        else await loadResults();
+      }
+    } catch(e) {}
+  }
+
+  function resetScrapeBtn() { const btn = document.getElementById('scrape-btn'); btn.disabled = false; btn.innerHTML = '🔍 Start Scraping'; }
+
+  // ── Results ────────────────────────────────────────────────────
+
+  async function loadResults() {
+    try {
+      const res  = await fetch(`${API}/api/results/${sessionId}`);
+      const data = await res.json();
+      allLeads = data.leads || [];
+      // Store meta text for use inside the wide layout
+      document.getElementById('results-meta').textContent = `Scanned ${data.total_comments || 0} comments · Found ${allLeads.length} business leads`;
+      setStep(3);
+      showSection('section-results');
+      renderLeads(allLeads);
+      // Scroll to results
+      document.getElementById('section-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      // Automatically start Excel download if leads are found!
+      if (allLeads.length > 0) {
+        setTimeout(() => {
+          downloadExcel(true);
+        }, 500);
+      }
+    } catch(e) { setAlert('scrape-alert','error','❌ Failed to load results.'); resetScrapeBtn(); }
+  }
+
+  function scoreClass(s) { return s >= 70 ? 'score-high' : s >= 40 ? 'score-medium' : 'score-low'; }
+
+  function renderLeads(leads) {
+    const section = document.getElementById('section-results');
+    if (!leads.length) {
+      section.innerHTML = `<div class="container"><div class="card"><div class="empty-state"><div class="empty-icon">🔍</div><div>No business leads found in those comments.<br/>Try lowering the Confidence Score threshold and scraping again.</div></div></div></div>`;
+      return;
+    }
+
+    const cards = leads.map((l, i) => {
+      const phones  = l.phones.length  ? l.phones.map(p  => `<span>${escHtml(p)}</span> <button class="copy-btn" onclick="copy('${escHtml(p)}',this)" title="Copy">⧉</button>`).join('<br/>') : `<span class="field-dash">—</span>`;
+      const emails  = l.emails.length  ? l.emails.map(e  => `<a href="mailto:${escHtml(e)}">${escHtml(e)}</a>`).join('<br/>') : `<span class="field-dash">—</span>`;
+      const websites= l.websites.length? l.websites.map(w => `<a href="${w.startsWith('http')?w:'https://'+w}" target="_blank" rel="noopener">${escHtml(w.length>45?w.slice(0,45)+'…':w)}</a>`).join('<br/>') : `<span class="field-dash">—</span>`;
+      const bio     = l.comment_text ? escHtml(l.comment_text).replace(/\n/g,'<br/>') : `<span class="field-dash">—</span>`;
+
+      return `
+      <div class="lead-card" id="lead-${i}">
+        <div class="lead-card-top">
+          <div>
+            <div class="lead-name">${escHtml(l.commenter_name)}</div>
+            <div class="lead-handle">${escHtml(l.instagram_handle)}</div>
+          </div>
+          <span class="score-pill ${scoreClass(l.confidence_score)}">${l.confidence_score}% match</span>
+        </div>
+        <div class="lead-divider"></div>
+        <div class="lead-fields">
+          <div class="lead-field">
+            <span class="lead-field-icon">📞</span>
+            <span class="lead-field-label">Phone</span>
+            <span class="lead-field-value">${phones}</span>
+          </div>
+          <div class="lead-field">
+            <span class="lead-field-icon">📧</span>
+            <span class="lead-field-label">Email</span>
+            <span class="lead-field-value">${emails}</span>
+          </div>
+          <div class="lead-field">
+            <span class="lead-field-icon">🌐</span>
+            <span class="lead-field-label">Website</span>
+            <span class="lead-field-value">${websites}</span>
+          </div>
+          <div class="lead-field">
+            <span class="lead-field-icon">📋</span>
+            <span class="lead-field-label">Bio</span>
+            <span class="lead-field-value bio-val">${bio}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    section.innerHTML = `
+      <div class="container-wide">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px 28px;margin-bottom:20px;">
+          <div class="results-header">
+            <div>
+              <div style="font-size:1.1rem;font-weight:700;margin-bottom:4px;">🏢 Business Leads Found</div>
+              <div id="results-meta-inner" style="font-size:.82rem;color:var(--muted);"></div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <span class="results-count" id="leads-count-inner">0 leads</span>
+              <input class="search-input" type="text" placeholder="🔍 Filter leads…" oninput="filterLeads(this.value)" style="max-width:220px;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.85rem;outline:none;" />
+              <button id="download-btn" class="btn btn-success" onclick="downloadExcel()">📥 Download Excel</button>
+              <button class="btn btn-secondary" onclick="resetToScrape()">🔄 New Scrape</button>
+            </div>
+          </div>
+        </div>
+        <div class="leads-grid" id="leads-grid">${cards}</div>
+      </div>`;
+
+    // Update meta
+    const metaEl = document.getElementById('results-meta-inner');
+    const countEl = document.getElementById('leads-count-inner');
+    if (metaEl) metaEl.textContent = document.getElementById('results-meta').textContent;
+    if (countEl) countEl.textContent = `${leads.length} leads`;
+  }
+
+  // Keep filterTable alias for the inline oninput
+  function filterTable(q) { filterLeads(q); }
+  function filterLeads(q) {
+    q = q.toLowerCase();
+    const filtered = q ? allLeads.filter(l =>
+      l.commenter_name.toLowerCase().includes(q) || l.instagram_handle.toLowerCase().includes(q) ||
+      l.phones.some(p => p.includes(q)) || l.emails.some(e => e.toLowerCase().includes(q)) ||
+      l.websites.some(w => w.toLowerCase().includes(q)) ||
+      (l.comment_text || '').toLowerCase().includes(q)
+    ) : allLeads;
+    // Re-render just the grid cards
+    const grid = document.getElementById('leads-grid');
+    if (!grid) { renderLeads(filtered); return; }
+    const cards = filtered.map((l, i) => {
+      const phones  = l.phones.length  ? l.phones.map(p  => `<span>${escHtml(p)}</span> <button class="copy-btn" onclick="copy('${escHtml(p)}',this)">⧉</button>`).join('<br/>') : `<span class="field-dash">—</span>`;
+      const emails  = l.emails.length  ? l.emails.map(e  => `<a href="mailto:${escHtml(e)}">${escHtml(e)}</a>`).join('<br/>') : `<span class="field-dash">—</span>`;
+      const websites= l.websites.length? l.websites.map(w => `<a href="${w.startsWith('http')?w:'https://'+w}" target="_blank" rel="noopener">${escHtml(w.length>45?w.slice(0,45)+'…':w)}</a>`).join('<br/>') : `<span class="field-dash">—</span>`;
+      const bio     = l.comment_text ? escHtml(l.comment_text).replace(/\n/g,'<br/>') : `<span class="field-dash">—</span>`;
+      return `<div class="lead-card">
+        <div class="lead-card-top"><div><div class="lead-name">${escHtml(l.commenter_name)}</div><div class="lead-handle">${escHtml(l.instagram_handle)}</div></div><span class="score-pill ${scoreClass(l.confidence_score)}">${l.confidence_score}% match</span></div>
+        <div class="lead-divider"></div>
+        <div class="lead-fields">
+          <div class="lead-field"><span class="lead-field-icon">📞</span><span class="lead-field-label">Phone</span><span class="lead-field-value">${phones}</span></div>
+          <div class="lead-field"><span class="lead-field-icon">📧</span><span class="lead-field-label">Email</span><span class="lead-field-value">${emails}</span></div>
+          <div class="lead-field"><span class="lead-field-icon">🌐</span><span class="lead-field-label">Website</span><span class="lead-field-value">${websites}</span></div>
+          <div class="lead-field"><span class="lead-field-icon">📋</span><span class="lead-field-label">Bio</span><span class="lead-field-value bio-val">${bio}</span></div>
+        </div></div>`;
+    }).join('');
+    grid.innerHTML = cards || `<div class="empty-state"><div class="empty-icon">🔍</div><div>No leads match your filter.</div></div>`;
+    const ci = document.getElementById('leads-count-inner');
+    if (ci) ci.textContent = `${filtered.length} leads`;
+  }
+
+  async function downloadExcel(isAuto = false) {
+    const btn = document.getElementById('download-btn');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = isAuto ? '<div class="spinner"></div> Auto-Downloading…' : '<div class="spinner"></div> Generating…';
+    }
+    try {
+      const res = await fetch(`${API}/api/download/${sessionId}?reel_url=${encodeURIComponent(currentReelUrl)}`);
+      if (!res.ok) throw new Error();
+      const blob = await res.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `business_leads_${new Date().toISOString().slice(0,10)}.xlsx`;
+      a.click();
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '✅ Excel Downloaded!';
+        setTimeout(() => { if (btn) btn.innerHTML = '📥 Download Excel'; }, 3500);
+      }
+    } catch(e) {
+      if (!isAuto) alert('Download failed. Please try again.');
+      if (btn) { btn.disabled = false; btn.innerHTML = '📥 Download Excel'; }
+    }
+  }
+
+  function copy(text, btn) { navigator.clipboard.writeText(text).then(() => { const o = btn.textContent; btn.textContent = '✓'; setTimeout(() => btn.textContent = o, 1500); }); }
+  function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function resetToScrape() {
+    allLeads = []; document.getElementById('progress-section').classList.add('hidden');
+    updateProgress('',0); clearAlert('scrape-alert'); resetScrapeBtn(); setStep(2); showSection('section-scrape');
+  }
+  async function logout() {
+    if (sessionId) { fetch(`${API}/api/logout/${sessionId}`).catch(()=>{}); sessionId = null; }
+    clearInterval(pollTimer); allLeads = [];
+    document.getElementById('nav-user').classList.add('hidden');
+    document.getElementById('nav-logout').classList.add('hidden');
+    document.getElementById('ig-sessionid').value = '';
+    resetLoginBtn(); clearAlert('login-alert'); setStep(1); showSection('section-login');
+  }
+  function resetLoginBtn() { const btn = document.getElementById('login-btn'); btn.disabled = false; btn.innerHTML = '🔌 Connect to Instagram'; }
+</script>
+</body>
+</html>

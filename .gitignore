@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Session & Secrets
+.ig_session
+*.session
+.env
+.env.local
+
+# Data Exports
+*.xlsx
+*.xls
+*.csv
+!examples/*.xlsx
+
+# OS / Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
