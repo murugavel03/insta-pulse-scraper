@@ -23,21 +23,22 @@ def _thin_border() -> Border:
     return Border(left=s, right=s, top=s, bottom=s)
 
 
-def export_to_excel(leads: List[ExtractedLead], reel_url: str) -> bytes:
+def export_to_excel(leads: List[ExtractedLead], reel_url: str = "") -> bytes:
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Business Leads"
 
     # ── Title row ──────────────────────────────────────────────────────────
-    ws.merge_cells("A1:I1")
+    ws.merge_cells("A1:K1")
     tc = ws["A1"]
-    tc.value = f"Instagram Reel Business Leads  |  {reel_url}"
+    source_label = f"  |  {reel_url}" if reel_url and not reel_url.startswith("Bulk") else ""
+    tc.value = f"Instagram Reel Business Leads{source_label}"
     tc.font = Font(name="Calibri", bold=True, size=12, color="1E1B4B")
     tc.alignment = Alignment(horizontal="center", vertical="center")
     tc.fill = PatternFill("solid", fgColor="EEF2FF")
     ws.row_dimensions[1].height = 28
 
-    ws.merge_cells("A2:I2")
+    ws.merge_cells("A2:K2")
     mc = ws["A2"]
     mc.value = (
         f"Scraped: {datetime.now().strftime('%d %b %Y  %I:%M %p')}  |  "
@@ -49,11 +50,11 @@ def export_to_excel(leads: List[ExtractedLead], reel_url: str) -> bytes:
 
     # ── Headers ────────────────────────────────────────────────────────────
     headers = [
-        "Sr.", "Company / Name", "Instagram Handle",
+        "Sr.", "Company / Name", "Instagram Handle", "Business Category",
         "Contact Number(s)", "Email(s)", "Website(s)",
-        "Instagram Bio", "Confidence", "Why Flagged",
+        "Instagram Bio / Comment", "Source Reel / Post", "Confidence", "Why Flagged",
     ]
-    col_widths = [5, 28, 22, 22, 30, 32, 42, 13, 45]
+    col_widths = [5, 26, 20, 22, 22, 28, 30, 42, 36, 12, 42]
 
     HR = 3
     for ci, (h, w) in enumerate(zip(headers, col_widths), start=1):
@@ -71,14 +72,18 @@ def export_to_excel(leads: List[ExtractedLead], reel_url: str) -> bytes:
         bg = ROW_ALT_BG if i % 2 == 0 else ROW_EVN_BG
         fill = PatternFill("solid", fgColor=bg)
 
+        src_url = getattr(lead, "source_url", "") or reel_url or "—"
+        cat = getattr(lead, "category", "") or "—"
         values = [
             i,
             lead.commenter_name,
             lead.instagram_handle,
+            cat,
             "\n".join(lead.phones) if lead.phones else "—",
             "\n".join(lead.emails) if lead.emails else "—",
             "\n".join(lead.websites) if lead.websites else "—",
             lead.comment_text,    # bio / comment text
+            src_url,
             f"{lead.confidence_score}%",
             "; ".join(lead.detection_reasons) if lead.detection_reasons else "—",
         ]
@@ -90,7 +95,7 @@ def export_to_excel(leads: List[ExtractedLead], reel_url: str) -> bytes:
             cell.border = _thin_border()
             cell.alignment = Alignment(
                 vertical="center",
-                horizontal="center" if ci in (1, 8) else "left",
+                horizontal="center" if ci in (1, 10) else "left",
                 wrap_text=True,
             )
 

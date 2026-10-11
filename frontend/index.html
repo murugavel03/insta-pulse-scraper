@@ -3,267 +3,439 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IG Lead Scraper — Find Business Contacts from Instagram Reels</title>
-  <meta name="description" content="Extract business leads, phone numbers, and websites from Instagram Reel comments. Export to Excel instantly." />
+  <title>IG Bulk Lead Scraper — Anti-Ban Business Lead Generator</title>
+  <meta name="description" content="Scrape business leads, WhatsApp contacts, phone numbers, and websites from Instagram Reels in bulk without getting banned. Multi-account rotation & anti-ban protection." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #0a0a0f; --surface: #12121a; --surface2: #1a1a28; --surface3: #20203a;
-      --border: rgba(99,102,241,.25); --indigo: #6366f1; --indigo-dim: #4f46e5;
+      --bg: #090a10; --surface: #11121c; --surface2: #181928; --surface3: #222338;
+      --border: rgba(99,102,241,.22); --indigo: #6366f1; --indigo-dim: #4f46e5;
       --violet: #8b5cf6; --pink: #ec4899; --green: #22c55e; --red: #ef4444;
-      --amber: #f59e0b; --text: #f1f5f9; --muted: #94a3b8; --radius: 14px;
-      --transition: .25s cubic-bezier(.4,0,.2,1);
+      --amber: #f59e0b; --cyan: #06b6d4; --text: #f1f5f9; --muted: #94a3b8;
+      --radius: 14px; --transition: .25s cubic-bezier(.4,0,.2,1);
     }
     body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
     body::before {
       content: ''; position: fixed; inset: 0; z-index: -1;
-      background: radial-gradient(ellipse 80% 60% at 20% 10%, rgba(99,102,241,.18) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 50% at 80% 80%, rgba(139,92,246,.14) 0%, transparent 55%), var(--bg);
+      background: radial-gradient(ellipse 85% 65% at 20% 10%, rgba(99,102,241,.18) 0%, transparent 60%),
+        radial-gradient(ellipse 65% 55% at 80% 85%, rgba(139,92,246,.15) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 50% at 50% 50%, rgba(6,182,212,.05) 0%, transparent 60%), var(--bg);
     }
-    .container { max-width: 960px; margin: 0 auto; padding: 0 20px; }
-    .container-wide { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
-    nav { display: flex; align-items: center; justify-content: space-between; padding: 18px 0; border-bottom: 1px solid var(--border); }
-    .logo { display: flex; align-items: center; gap: 10px; font-size: 1.2rem; font-weight: 700; }
-    .logo-icon { width: 34px; height: 34px; border-radius: 10px; background: linear-gradient(135deg, var(--indigo), var(--violet)); display: flex; align-items: center; justify-content: center; font-size: 18px; }
-    .badge { background: rgba(99,102,241,.15); border: 1px solid rgba(99,102,241,.3); color: var(--indigo); font-size: .72rem; font-weight: 600; letter-spacing: .5px; padding: 3px 10px; border-radius: 20px; text-transform: uppercase; }
-    .hero { text-align: center; padding: 50px 0 36px; }
-    .hero-tag { display: inline-flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 600; letter-spacing: .8px; text-transform: uppercase; color: var(--indigo); background: rgba(99,102,241,.12); border: 1px solid rgba(99,102,241,.25); padding: 5px 14px; border-radius: 20px; margin-bottom: 20px; }
-    .hero h1 { font-size: clamp(1.8rem, 5vw, 3rem); font-weight: 800; line-height: 1.15; letter-spacing: -1px; margin-bottom: 14px; }
-    .hero h1 span { background: linear-gradient(135deg, var(--indigo), var(--violet), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .hero p { font-size: 1rem; color: var(--muted); max-width: 520px; margin: 0 auto 32px; line-height: 1.7; }
-    .stats-row { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; margin-bottom: 40px; }
+    .container { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+    .container-wide { max-width: 1420px; margin: 0 auto; padding: 0 24px; }
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; border-bottom: 1px solid var(--border); }
+    .logo { display: flex; align-items: center; gap: 10px; font-size: 1.25rem; font-weight: 700; }
+    .logo-icon { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, var(--indigo), var(--violet)); display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 15px rgba(99,102,241,.3); }
+    .badge-pill { background: rgba(99,102,241,.15); border: 1px solid rgba(99,102,241,.3); color: #a5b4fc; font-size: .72rem; font-weight: 600; letter-spacing: .5px; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; }
+    .badge-shield { background: rgba(34,197,94,.15); border: 1px solid rgba(34,197,94,.3); color: #86efac; display: inline-flex; align-items: center; gap: 5px; }
+
+    .hero { text-align: center; padding: 44px 0 28px; }
+    .hero-tag { display: inline-flex; align-items: center; gap: 7px; font-size: .8rem; font-weight: 600; letter-spacing: .8px; text-transform: uppercase; color: #a5b4fc; background: rgba(99,102,241,.12); border: 1px solid rgba(99,102,241,.3); padding: 6px 16px; border-radius: 20px; margin-bottom: 18px; }
+    .hero h1 { font-size: clamp(2rem, 5.5vw, 3rem); font-weight: 800; line-height: 1.18; letter-spacing: -1px; margin-bottom: 14px; }
+    .hero h1 span { background: linear-gradient(135deg, #818cf8, #a855f7, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero p { font-size: 1rem; color: var(--muted); max-width: 600px; margin: 0 auto 26px; line-height: 1.6; }
+
+    .stats-row { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; margin-bottom: 32px; }
     .stat { text-align: center; }
-    .stat-value { font-size: 1.5rem; font-weight: 800; background: linear-gradient(135deg, var(--indigo), var(--violet)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .stat-label { font-size: .75rem; color: var(--muted); margin-top: 2px; }
-    .steps { display: flex; align-items: center; margin-bottom: 28px; }
-    .step { display: flex; align-items: center; gap: 8px; font-size: .82rem; font-weight: 500; color: var(--muted); }
+    .stat-value { font-size: 1.35rem; font-weight: 800; background: linear-gradient(135deg, var(--indigo), var(--violet)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .stat-label { font-size: .75rem; color: var(--muted); margin-top: 3px; font-weight: 500; }
+
+    .steps { display: flex; align-items: center; margin-bottom: 26px; }
+    .step { display: flex; align-items: center; gap: 8px; font-size: .84rem; font-weight: 500; color: var(--muted); }
     .step-num { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--border); font-size: .75rem; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all var(--transition); }
-    .step.active .step-num { border-color: var(--indigo); background: rgba(99,102,241,.15); color: var(--indigo); }
-    .step.done .step-num { border-color: var(--green); background: rgba(34,197,94,.15); color: var(--green); }
-    .step.active { color: var(--text); }
+    .step.active .step-num { border-color: var(--indigo); background: rgba(99,102,241,.18); color: #fff; box-shadow: 0 0 12px rgba(99,102,241,.4); }
+    .step.done .step-num { border-color: var(--green); background: rgba(34,197,94,.18); color: var(--green); }
+    .step.active { color: var(--text); font-weight: 600; }
     .step-line { flex: 1; height: 1px; background: var(--border); margin: 0 10px; }
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 32px; margin-bottom: 20px; transition: border-color var(--transition); }
-    .card:hover { border-color: rgba(99,102,241,.4); }
-    .card-title { font-size: .72rem; font-weight: 600; letter-spacing: .8px; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 32px; margin-bottom: 20px; transition: border-color var(--transition), box-shadow var(--transition); }
+    .card:hover { border-color: rgba(99,102,241,.45); box-shadow: 0 8px 30px rgba(0,0,0,.25); }
+    .card-title { font-size: .78rem; font-weight: 700; letter-spacing: .9px; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
     .card-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
     .form-group { margin-bottom: 16px; }
-    label { display: block; font-size: .83rem; font-weight: 500; color: var(--muted); margin-bottom: 7px; }
-    input[type="text"], input[type="password"], input[type="url"], input[type="number"] {
-      width: 100%; padding: 11px 15px; background: var(--surface2); border: 1px solid var(--border);
+    label { display: block; font-size: .84rem; font-weight: 600; color: var(--muted); margin-bottom: 7px; }
+    input[type="text"], input[type="url"], input[type="number"], textarea {
+      width: 100%; padding: 12px 16px; background: var(--surface2); border: 1px solid var(--border);
       border-radius: 10px; color: var(--text); font-family: inherit; font-size: .92rem;
       outline: none; transition: border-color var(--transition), box-shadow var(--transition);
     }
-    input:focus { border-color: var(--indigo); box-shadow: 0 0 0 3px rgba(99,102,241,.15); }
-    .session-input { font-family: 'JetBrains Mono', monospace !important; font-size: .8rem !important; letter-spacing: .5px; color: #a5b4fc !important; }
+    textarea { resize: vertical; min-height: 110px; font-family: 'JetBrains Mono', monospace; font-size: .84rem; line-height: 1.5; }
+    input:focus, textarea:focus { border-color: var(--indigo); box-shadow: 0 0 0 3px rgba(99,102,241,.2); }
+    .session-input { font-family: 'JetBrains Mono', monospace !important; font-size: .8rem !important; letter-spacing: .4px; color: #c7d2fe !important; }
     .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 11px 24px; border-radius: 10px; font-family: inherit; font-size: .9rem; font-weight: 600; cursor: pointer; transition: all var(--transition); border: none; }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 24px; border-radius: 10px; font-family: inherit; font-size: .92rem; font-weight: 600; cursor: pointer; transition: all var(--transition); border: none; }
     .btn-primary { background: linear-gradient(135deg, var(--indigo-dim), var(--indigo)); color: #fff; box-shadow: 0 4px 20px rgba(99,102,241,.35); }
-    .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(99,102,241,.45); }
+    .btn-primary:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(99,102,241,.5); }
     .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
     .btn-secondary { background: var(--surface2); border: 1px solid var(--border); color: var(--text); }
-    .btn-secondary:hover { border-color: var(--indigo); }
+    .btn-secondary:hover { border-color: var(--indigo); background: var(--surface3); }
     .btn-success { background: linear-gradient(135deg, #16a34a, #22c55e); color: #fff; box-shadow: 0 4px 20px rgba(34,197,94,.3); }
     .btn-success:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(34,197,94,.4); }
     .btn-lg { padding: 14px 32px; font-size: 1rem; border-radius: 12px; }
     .btn-full { width: 100%; }
 
-    /* How-to steps */
-    .how-to { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-bottom: 20px; }
-    .how-to-title { font-size: .82rem; font-weight: 700; color: var(--indigo); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-    .how-to-steps { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-    .how-to-steps li { display: flex; align-items: flex-start; gap: 10px; font-size: .84rem; color: var(--muted); line-height: 1.5; }
+    .preset-btn {
+      background: var(--surface3); border: 1px solid var(--border);
+      color: var(--muted); padding: 3px 10px; border-radius: 8px;
+      font-size: .74rem; font-weight: 600; cursor: pointer; transition: all var(--transition);
+    }
+    .preset-btn:hover, .preset-btn.active {
+      background: rgba(99,102,241,.2); border-color: var(--indigo); color: #fff; box-shadow: 0 0 10px rgba(99,102,241,.25);
+    }
+
+    /* Tabs */
+    .tab-pills { display: flex; gap: 10px; margin-bottom: 16px; }
+    .tab-pill {
+      padding: 8px 18px; border-radius: 10px; font-size: .85rem; font-weight: 600;
+      background: var(--surface2); border: 1px solid var(--border); cursor: pointer;
+      color: var(--muted); transition: all var(--transition);
+    }
+    .tab-pill.active { background: rgba(99,102,241,.18); border-color: var(--indigo); color: #fff; box-shadow: 0 2px 12px rgba(99,102,241,.25); }
+
+    /* Safety & Mode selector radio cards */
+    .selector-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-bottom: 18px; }
+    .selector-card {
+      background: var(--surface2); border: 2px solid var(--border); border-radius: 12px;
+      padding: 14px 16px; cursor: pointer; transition: all var(--transition); display: flex; flex-direction: column; gap: 4px;
+    }
+    .selector-card.active { border-color: var(--indigo); background: rgba(99,102,241,.12); box-shadow: 0 4px 18px rgba(99,102,241,.18); }
+    .selector-title { font-size: .88rem; font-weight: 700; display: flex; align-items: center; justify-content: space-between; }
+    .selector-desc { font-size: .75rem; color: var(--muted); line-height: 1.45; }
+
+    /* Shields & alerts */
+    .shield-box { background: rgba(99,102,241,.06); border: 1px solid rgba(99,102,241,.25); border-radius: 12px; padding: 16px 20px; margin-bottom: 18px; }
+    .shield-box-title { font-size: .84rem; font-weight: 700; color: #a5b4fc; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+    .shield-bullets { list-style: none; display: flex; flex-direction: column; gap: 6px; font-size: .82rem; color: var(--muted); }
+    .shield-bullets li { display: flex; align-items: flex-start; gap: 8px; line-height: 1.4; }
+    .shield-bullets li strong { color: var(--text); }
+
+    .how-to { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 18px; }
+    .how-to-title { font-size: .82rem; font-weight: 700; color: #a5b4fc; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .how-to-steps { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .how-to-steps li { display: flex; align-items: flex-start; gap: 10px; font-size: .83rem; color: var(--muted); line-height: 1.45; }
     .how-to-steps li .step-badge { background: linear-gradient(135deg, var(--indigo-dim), var(--indigo)); color: #fff; font-size: .7rem; font-weight: 700; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
     .how-to-steps li strong { color: var(--text); }
-    .kbd { display: inline-block; background: var(--surface3); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; font-family: 'JetBrains Mono', monospace; font-size: .75rem; color: var(--indigo); }
+    .kbd { display: inline-block; background: var(--surface3); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; font-family: 'JetBrains Mono', monospace; font-size: .75rem; color: #a5b4fc; }
 
-    .progress-wrap { background: var(--surface2); border-radius: 20px; height: 8px; overflow: hidden; margin: 16px 0; }
-    .progress-bar { height: 100%; border-radius: 20px; background: linear-gradient(90deg, var(--indigo-dim), var(--violet), var(--pink)); background-size: 200% 100%; animation: shimmer 1.5s linear infinite; transition: width .5s ease; width: 0%; }
+    .progress-wrap { background: var(--surface2); border-radius: 20px; height: 10px; overflow: hidden; margin: 18px 0; border: 1px solid var(--border); }
+    .progress-bar { height: 100%; border-radius: 20px; background: linear-gradient(90deg, var(--indigo), var(--violet), var(--pink)); background-size: 200% 100%; animation: shimmer 1.5s linear infinite; transition: width .4s ease; width: 0%; }
     @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-    .progress-msg { font-size: .82rem; color: var(--muted); margin-top: 6px; display: flex; justify-content: space-between; }
+    .progress-msg { font-size: .84rem; color: var(--muted); margin-top: 6px; display: flex; justify-content: space-between; font-weight: 500; }
+
     .alert { padding: 12px 16px; border-radius: 10px; font-size: .86rem; display: flex; align-items: flex-start; gap: 10px; margin: 12px 0; }
     .alert-error  { background: rgba(239,68,68,.1);  border: 1px solid rgba(239,68,68,.25);  color: #fca5a5; }
     .alert-success{ background: rgba(34,197,94,.1);  border: 1px solid rgba(34,197,94,.25);  color: #86efac; }
     .alert-info   { background: rgba(99,102,241,.1); border: 1px solid rgba(99,102,241,.25); color: #a5b4fc; }
     .alert-warn   { background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.25); color: #fcd34d; }
-    .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-    .results-count { font-size: .85rem; font-weight: 600; background: rgba(99,102,241,.15); border: 1px solid rgba(99,102,241,.3); color: var(--indigo); padding: 4px 12px; border-radius: 20px; }
-    .search-input { max-width: 260px; padding: 8px 14px !important; }
 
-    /* Lead Cards Grid */
-    .leads-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 16px; }
-    .lead-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; transition: border-color var(--transition), transform var(--transition); }
-    .lead-card:hover { border-color: rgba(99,102,241,.5); transform: translateY(-2px); }
+    .account-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .account-tag { background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.3); color: #86efac; font-size: .76rem; font-weight: 600; padding: 4px 10px; border-radius: 16px; display: inline-flex; align-items: center; gap: 5px; }
+
+    /* Results */
+    .results-banner { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px 28px; margin-bottom: 24px; }
+    .results-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+    .metric-pills { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+    .metric-pill { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 8px 14px; font-size: .8rem; }
+    .metric-pill strong { color: #a5b4fc; font-weight: 700; margin-right: 4px; }
+
+    .leads-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 18px; }
+    .lead-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; transition: border-color var(--transition), transform var(--transition); }
+    .lead-card:hover { border-color: rgba(99,102,241,.55); transform: translateY(-2px); box-shadow: 0 6px 25px rgba(0,0,0,.3); }
     .lead-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; gap: 10px; }
-    .lead-name { font-size: .95rem; font-weight: 700; line-height: 1.3; }
-    .lead-handle { font-size: .78rem; color: var(--indigo); font-weight: 500; margin-top: 2px; }
-    .score-pill { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-weight: 700; font-size: .75rem; white-space: nowrap; flex-shrink: 0; }
-    .score-high   { background: rgba(34,197,94,.15);  color: #86efac; }
-    .score-medium { background: rgba(245,158,11,.15); color: #fcd34d; }
-    .score-low    { background: rgba(99,102,241,.15); color: #a5b4fc; }
+    .lead-name { font-size: .98rem; font-weight: 700; line-height: 1.3; }
+    .lead-handle { font-size: .8rem; color: #818cf8; font-weight: 600; margin-top: 2px; }
+    .lead-handle a { color: #818cf8; text-decoration: none; }
+    .lead-handle a:hover { text-decoration: underline; }
+    .score-pill { display: inline-flex; align-items: center; padding: 4px 11px; border-radius: 20px; font-weight: 700; font-size: .75rem; white-space: nowrap; flex-shrink: 0; }
+    .score-high   { background: rgba(34,197,94,.16);  color: #86efac; }
+    .score-medium { background: rgba(245,158,11,.16); color: #fcd34d; }
+    .score-low    { background: rgba(99,102,241,.16); color: #a5b4fc; }
 
-    /* Lead card data rows */
-    .lead-fields { display: flex; flex-direction: column; gap: 8px; }
-    .lead-field { display: flex; align-items: flex-start; gap: 8px; font-size: .82rem; }
+    .lead-fields { display: flex; flex-direction: column; gap: 9px; }
+    .lead-field { display: flex; align-items: flex-start; gap: 8px; font-size: .83rem; }
     .lead-field-icon { font-size: .9rem; flex-shrink: 0; width: 20px; text-align: center; margin-top: 1px; }
-    .lead-field-label { font-size: .68rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; white-space: nowrap; flex-shrink: 0; width: 48px; margin-top: 2px; }
-    .lead-field-value { color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: .78rem; word-break: break-all; flex: 1; }
+    .lead-field-label { font-size: .68rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; white-space: nowrap; flex-shrink: 0; width: 56px; margin-top: 2px; }
+    .lead-field-value { color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: .8rem; word-break: break-all; flex: 1; }
     .lead-field-value a { color: #818cf8; text-decoration: none; }
     .lead-field-value a:hover { text-decoration: underline; }
-    .lead-field-value.bio-val { font-family: inherit; font-size: .8rem; color: var(--muted); white-space: pre-wrap; word-break: break-word; line-height: 1.5; }
+    .lead-field-value.bio-val { font-family: inherit; font-size: .82rem; color: var(--muted); white-space: pre-wrap; word-break: break-word; line-height: 1.5; }
     .field-dash { color: var(--muted); opacity: .4; }
-    .copy-btn { background: none; border: none; cursor: pointer; color: var(--muted); font-size: .7rem; padding: 1px 5px; border-radius: 4px; transition: color var(--transition); }
+    .copy-btn { background: none; border: none; cursor: pointer; color: var(--muted); font-size: .74rem; padding: 2px 6px; border-radius: 4px; transition: color var(--transition); }
     .copy-btn:hover { color: var(--text); }
-    .lead-divider { height: 1px; background: var(--border); margin: 10px 0; }
+    .wa-btn { background: rgba(34,197,94,.16); color: #86efac; border: 1px solid rgba(34,197,94,.35); font-size: .72rem; padding: 3px 8px; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; font-family: 'Inter', sans-serif; font-weight: 600; }
+    .wa-btn:hover { background: rgba(34,197,94,.35); color: #fff; text-decoration: none; }
+    .source-badge { display: inline-flex; align-items: center; gap: 4px; background: var(--surface3); color: #c7d2fe; font-size: .72rem; padding: 2px 8px; border-radius: 6px; text-decoration: none; }
+    .source-badge:hover { color: #fff; text-decoration: underline; }
+
+    .lead-divider { height: 1px; background: var(--border); margin: 12px 0; }
     .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
     .empty-icon { font-size: 3rem; margin-bottom: 16px; opacity: .4; }
     .hidden { display: none !important; }
-    .logout-link { font-size: .8rem; color: var(--muted); cursor: pointer; text-decoration: underline; transition: color var(--transition); }
+    .logout-link { font-size: .82rem; color: var(--muted); cursor: pointer; text-decoration: underline; transition: color var(--transition); }
     .logout-link:hover { color: var(--red); }
     .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .logged-in-info { display: flex; align-items: center; gap: 10px; background: rgba(34,197,94,.08); border: 1px solid rgba(34,197,94,.2); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; font-size: .85rem; }
-    .logged-in-info span { color: #86efac; font-weight: 600; }
-    footer { text-align: center; color: var(--muted); font-size: .76rem; padding: 32px 0 24px; border-top: 1px solid var(--border); margin-top: 40px; }
-    @media (max-width: 600px) { .input-row { grid-template-columns: 1fr; } .card { padding: 20px 18px; } .hero { padding: 36px 0 24px; } }
+
+    footer { text-align: center; color: var(--muted); font-size: .76rem; padding: 36px 0 24px; border-top: 1px solid var(--border); margin-top: 45px; }
+    @media (max-width: 640px) { .input-row, .selector-grid { grid-template-columns: 1fr; } .card { padding: 20px 18px; } .hero { padding: 30px 0 16px; } }
   </style>
 </head>
 <body>
 <div class="container">
 
   <nav>
-    <div class="logo"><div class="logo-icon">📊</div> IG Lead Scraper</div>
-    <div style="display:flex;align-items:center;gap:14px;">
-      <span class="badge">AI-Powered</span>
+    <div class="logo"><div class="logo-icon">📊</div> IG Bulk Lead Scraper</div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="badge-pill badge-shield">🛡️ Anti-Ban Shield Active</span>
       <span id="nav-user" class="hidden" style="font-size:.82rem;color:var(--green);font-weight:600;"></span>
-      <span id="nav-logout" class="hidden logout-link" onclick="logout()">🔴 Logout</span>
+      <span id="nav-logout" class="hidden logout-link" onclick="logout()">🔴 Disconnect</span>
     </div>
   </nav>
 
   <section class="hero">
-    <div class="hero-tag">🚀 Business Lead Extraction</div>
-    <h1>Find <span>Business Contacts</span><br/>from Instagram Reels</h1>
-    <p>Paste any Instagram Reel URL. Our AI scans every comment, detects businesses, extracts phone numbers, emails &amp; websites — and exports to Excel in one click.</p>
+    <div class="hero-tag">🚀 Bulk Lead Extraction &amp; Account Protection</div>
+    <h1>Extract <span>Business Leads</span> in Bulk<br/>Without Getting Banned</h1>
+    <p>Paste multiple Instagram Reel URLs. Our multi-account rotation, stealth human delay engine &amp; AI parser extract verified business contacts safely to Excel.</p>
     <div class="stats-row">
-      <div class="stat"><div class="stat-value">500+</div><div class="stat-label">Comments Scanned</div></div>
-      <div class="stat"><div class="stat-value">AI</div><div class="stat-label">Business Detection</div></div>
-      <div class="stat"><div class="stat-value">.xlsx</div><div class="stat-label">Excel Export</div></div>
+      <div class="stat"><div class="stat-value">🔄 Pool</div><div class="stat-label">Multi-Account Rotation</div></div>
+      <div class="stat"><div class="stat-value">🛡️ 0% Ban</div><div class="stat-label">Anti-Ban Pacing &amp; Cooldown</div></div>
+      <div class="stat"><div class="stat-value">📦 Bulk</div><div class="stat-label">Multi-Reel Simultaneous Scanning</div></div>
+      <div class="stat"><div class="stat-value">📥 .xlsx</div><div class="stat-label">Unified Excel Export</div></div>
     </div>
   </section>
 
   <div class="steps">
-    <div class="step active" id="step1"><div class="step-num" id="s1">1</div> Connect</div>
+    <div class="step active" id="step1"><div class="step-num" id="s1">1</div> Connect Accounts</div>
     <div class="step-line"></div>
-    <div class="step" id="step2"><div class="step-num" id="s2">2</div> Scrape Reel</div>
+    <div class="step" id="step2"><div class="step-num" id="s2">2</div> Configure Bulk Scrape</div>
     <div class="step-line"></div>
-    <div class="step" id="step3"><div class="step-num" id="s3">3</div> Download Excel</div>
+    <div class="step" id="step3"><div class="step-num" id="s3">3</div> Download Leads</div>
   </div>
 
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- SECTION 1 — Session ID Login                               -->
+  <!-- SECTION 1 — Session ID & Proxy Connection                   -->
   <!-- ═══════════════════════════════════════════════════════════ -->
   <div id="section-login">
     <div class="card">
-      <div class="card-title">🔐 Step 1 — Connect Your Instagram Account</div>
+      <div class="card-title">🔐 Step 1 — Connect Instagram Sessions (Account Pool)</div>
 
-      <div class="alert alert-info">
-        🔒 <div>We use your <strong>browser session cookie</strong> — no password needed! This is 100% safe and bypasses all Instagram challenges. Your session ID stays on your local PC only.</div>
+      <!-- Anti-Ban Golden Rules -->
+      <div class="shield-box">
+        <div class="shield-box-title">🛡️ Golden Rules for 100% Safe Instagram Scraping</div>
+        <ul class="shield-bullets">
+          <li><strong>Burner Accounts:</strong> Never use your personal/main account. Use secondary or test Instagram accounts.</li>
+          <li><strong>Session Rotation:</strong> You can paste multiple session IDs below (one per line). Requests will automatically rotate across accounts so no single account gets overworked!</li>
+          <li><strong>Proxy Support:</strong> Optionally specify an HTTP/SOCKS5 proxy to keep your home IP address completely clean.</li>
+        </ul>
       </div>
 
-      <!-- How to get session ID -->
       <div class="how-to">
-        <div class="how-to-title">📋 How to get your Instagram Session ID (30 seconds)</div>
+        <div class="how-to-title">📋 How to grab your Instagram Session ID (in 30 seconds)</div>
         <ol class="how-to-steps">
-          <li>
-            <div class="step-badge">1</div>
-            <div>Open <strong>instagram.com</strong> in Chrome and make sure you're <strong>logged in</strong></div>
-          </li>
-          <li>
-            <div class="step-badge">2</div>
-            <div>Press <span class="kbd">F12</span> to open Developer Tools (or right-click → Inspect)</div>
-          </li>
-          <li>
-            <div class="step-badge">3</div>
-            <div>Click the <strong>Application</strong> tab → expand <strong>Cookies</strong> in the left panel → click <strong>https://www.instagram.com</strong></div>
-          </li>
-          <li>
-            <div class="step-badge">4</div>
-            <div>Find the cookie named <span class="kbd">sessionid</span> → click on it → <strong>copy the Value</strong> (long string of letters and numbers)</div>
-          </li>
-          <li>
-            <div class="step-badge">5</div>
-            <div>Paste it in the box below and click <strong>Connect</strong></div>
-          </li>
+          <li><div class="step-badge">1</div><div>Open <strong>instagram.com</strong> in your browser (logged into your burner/secondary account)</div></li>
+          <li><div class="step-badge">2</div><div>Press <span class="kbd">F12</span> to open Developer Tools &rarr; select <strong>Application</strong> (or Storage) tab</div></li>
+          <li><div class="step-badge">3</div><div>Expand <strong>Cookies</strong> &rarr; click <strong>https://www.instagram.com</strong></div></li>
+          <li><div class="step-badge">4</div><div>Find cookie named <span class="kbd">sessionid</span> &rarr; copy its entire Value and paste below</div></li>
         </ol>
       </div>
 
       <div class="form-group">
-        <label for="ig-sessionid">Instagram Session ID <span style="color:var(--muted);font-weight:400;">(from browser cookies)</span></label>
-        <input id="ig-sessionid" type="text" class="session-input"
-          placeholder="57631892%3AbXyZ1234abcd…  (paste your sessionid here)" />
+        <label for="ig-sessionids">Instagram Session ID(s) <span style="color:var(--muted);font-weight:400;">(paste 1 or multiple — one per line for rotation)</span></label>
+        <textarea id="ig-sessionids" class="session-input" rows="3" placeholder="57631892%3AbXyZ1234abcd…&#10;58992110%3AzWqA9876efgh… (optional 2nd burner account)"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="ig-proxy">Proxy <span style="color:var(--muted);font-weight:400;">(Optional — e.g., http://user:pass@host:port or socks5://host:port)</span></label>
+        <input id="ig-proxy" type="text" placeholder="http://username:password@proxy.example.com:8080 (leave blank to use direct connection)" />
       </div>
 
       <div id="login-alert" class="hidden"></div>
 
       <button id="login-btn" class="btn btn-primary btn-full btn-lg" onclick="doLogin()">
-        🔌 Connect to Instagram
+        🔌 Connect &amp; Verify Accounts
       </button>
     </div>
   </div>
 
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- SECTION 2 — Scrape                                         -->
+  <!-- SECTION 2 — Bulk Scrape Configuration                       -->
   <!-- ═══════════════════════════════════════════════════════════ -->
   <div id="section-scrape" class="hidden">
     <div class="card">
-      <div class="card-title">🎬 Step 2 — Paste Instagram Reel URL</div>
+      <div class="card-title">🎬 Step 2 — Queue Instagram Reels &amp; Anti-Ban Controls</div>
 
-      <div id="logged-in-banner" class="logged-in-banner hidden logged-in-info">
-        ✅ Connected as <span id="logged-in-user"></span>
+      <div id="connected-accounts-card" style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div style="font-size:.78rem;color:var(--muted);text-transform:uppercase;font-weight:600;">Active Account Pool</div>
+          <div id="account-tags" class="account-tags"></div>
+        </div>
+        <button class="btn btn-secondary" onclick="logout()" style="padding:6px 14px;font-size:.8rem;">⚙️ Manage Accounts</button>
       </div>
 
-      <div class="form-group">
-        <label for="reel-url">Instagram Reel / Post URL</label>
-        <input id="reel-url" type="url" placeholder="https://www.instagram.com/reel/ABC123xyz/" />
+      <!-- Mode Switcher Tabs -->
+      <div class="tab-pills">
+        <div class="tab-pill active" id="tab-bulk" onclick="switchInputMode('bulk')">📦 Bulk Reels (Batch Mode)</div>
+        <div class="tab-pill" id="tab-single" onclick="switchInputMode('single')">🎯 Single Reel</div>
       </div>
+
+      <!-- Bulk Reels Input -->
+      <div id="input-bulk-wrap" class="form-group">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <label for="bulk-reel-urls" style="margin:0;">Paste Instagram Reel / Post URLs (One per line)</label>
+          <span id="url-counter-badge" class="badge-pill" style="font-size:.7rem;">0 URLs detected</span>
+        </div>
+        <textarea id="bulk-reel-urls" oninput="updateUrlCounter()" rows="5" placeholder="https://www.instagram.com/reel/C_xyz123/&#10;https://www.instagram.com/reel/DBa789def/&#10;https://www.instagram.com/p/Cw9876gh/"></textarea>
+      </div>
+
+      <!-- Single Reel Input -->
+      <div id="input-single-wrap" class="form-group hidden">
+        <label for="single-reel-url">Instagram Reel URL</label>
+        <input id="single-reel-url" type="url" placeholder="https://www.instagram.com/reel/C_xyz123/" />
+      </div>
+
+      <!-- Anti-Ban Safety Preset Selector -->
+      <label style="margin-top:14px;">🛡️ Anti-Ban Safety Profile</label>
+      <div class="selector-grid">
+        <div class="selector-card active" id="preset-ultra" onclick="setSafety('ultra')">
+          <div class="selector-title">
+            <span>🛡️ Ultra-Safe</span>
+            <span style="font-size:.7rem;color:var(--green);font-weight:700;">Recommended</span>
+          </div>
+          <div class="selector-desc">Stealth human jitter (4-7s delay) + 20s inter-reel cooldown. Zero ban risk for bulk scraping.</div>
+        </div>
+        <div class="selector-card" id="preset-balanced" onclick="setSafety('balanced')">
+          <div class="selector-title">
+            <span>⚖️ Balanced</span>
+          </div>
+          <div class="selector-desc">Paced human delays (2.5-4.5s) + 10s cooldown. Best for 1 to 3 reels.</div>
+        </div>
+        <div class="selector-card" id="preset-turbo" onclick="setSafety('turbo')">
+          <div class="selector-title">
+            <span>⚡ Turbo</span>
+          </div>
+          <div class="selector-desc">High-speed mode (1-2s delay). Recommended only if using rotating proxies.</div>
+        </div>
+      </div>
+
+      <!-- Extraction Depth Mode -->
+      <label>Extraction Depth Mode</label>
+      <div class="selector-grid">
+        <div class="selector-card active" id="mode-fast" onclick="setDeepMode(false)">
+          <div class="selector-title">
+            <span>⚡ Fast Comment AI</span>
+            <span style="font-size:.7rem;color:var(--green);font-weight:700;">0% Ban Risk</span>
+          </div>
+          <div class="selector-desc">Instantly analyzes comments for phone numbers, WhatsApp links, emails &amp; keywords without checking bios.</div>
+        </div>
+        <div class="selector-card" id="mode-deep" onclick="setDeepMode(true)">
+          <div class="selector-title">
+            <span>🔍 Complete Business Profile Scraper</span>
+            <span style="font-size:.7rem;color:#818cf8;font-weight:700;">Bio &amp; Category</span>
+          </div>
+          <div class="selector-desc">Safely checks bios, official business categories, websites, and verified contact numbers of ALL business-related commenters.</div>
+        </div>
+      </div>
+
       <div class="input-row">
         <div class="form-group">
-          <label for="max-comments">Max Comments to Scan</label>
-          <input id="max-comments" type="number" value="300" min="10" max="2000" />
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <label for="max-comments" style="margin:0;">Max Comments per Reel</label>
+            <div style="display:flex;gap:6px;">
+              <button type="button" class="preset-btn" id="pbtn-300" onclick="setMaxComments(300)">300</button>
+              <button type="button" class="preset-btn" id="pbtn-500" onclick="setMaxComments(500)">500</button>
+              <button type="button" class="preset-btn" id="pbtn-1000" onclick="setMaxComments(1000)">1000</button>
+              <button type="button" class="preset-btn active" id="pbtn-0" onclick="setMaxComments(0)">🔥 Complete (100% of Reel)</button>
+            </div>
+          </div>
+          <input id="max-comments" type="number" value="0" min="0" max="5000" oninput="highlightPreset(this.value)" placeholder="Enter 0 to scrape ALL comments" />
+          <div style="font-size:.73rem;color:#86efac;margin-top:5px;display:flex;align-items:center;gap:4px;">
+            🛡️ <span><strong>Stealth Anti-Ban Engine:</strong> With <strong>Complete (100%)</strong> selected, the engine scrapes every single comment on the Reel with automatic 5s stealth pauses every 100 comments.</span>
+          </div>
         </div>
         <div class="form-group">
           <label for="min-confidence">Min Confidence Score (%)</label>
           <input id="min-confidence" type="number" value="25" min="10" max="90" />
+          <div style="font-size:.73rem;color:var(--muted);margin-top:5px;">
+            Recommended: 25% for high reach, 40%+ for phone/WhatsApp priority.
+          </div>
         </div>
       </div>
 
       <div id="scrape-alert" class="hidden"></div>
-      <div id="progress-section" class="hidden">
+
+      <!-- Live Dynamic Progress Section -->
+      <div id="progress-section" class="hidden" style="margin-top:12px;">
         <div class="progress-wrap"><div class="progress-bar" id="progress-bar"></div></div>
         <div class="progress-msg">
-          <span id="progress-msg-text">Initializing…</span>
+          <span id="progress-msg-text">Initializing scraper…</span>
           <span id="progress-pct">0%</span>
         </div>
       </div>
-      <button id="scrape-btn" class="btn btn-primary btn-full btn-lg" onclick="doScrape()" style="margin-top:8px;">
-        🔍 Start Scraping
+
+      <button id="scrape-btn" class="btn btn-primary btn-full btn-lg" onclick="doScrape()" style="margin-top:10px;">
+        🚀 Start Bulk Lead Extraction
       </button>
     </div>
   </div>
 
   <!-- ═══════════════════════════════════════════════════════════ -->
-  <!-- SECTION 3 — Results (wide layout)                          -->
+  <!-- SECTION 3 — Unified Results                                 -->
   <!-- ═══════════════════════════════════════════════════════════ -->
   <div id="section-results" class="hidden"></div>
 
-  <footer>Built with ❤️ for business lead generation &nbsp;·&nbsp; Runs 100% locally on your machine</footer>
+  <footer>Built with ❤️ for High-Volume Business Lead Generation &nbsp;&bull;&nbsp; 100% Local &amp; Private</footer>
 </div>
 
 <script>
   const API = 'http://127.0.0.1:8000';
-  let sessionId = null, allLeads = [], pollTimer = null, currentReelUrl = '';
+  let sessionId = null, allLeads = [], pollTimer = null, currentSafety = 'ultra', isDeepMode = false, inputMode = 'bulk';
+
+  function setMaxComments(n) {
+    document.getElementById('max-comments').value = n;
+    highlightPreset(n);
+  }
+
+  function highlightPreset(n) {
+    const val = parseInt(n);
+    [0, 300, 500, 1000].forEach(p => {
+      const btn = document.getElementById(`pbtn-${p}`);
+      if (btn) btn.classList.toggle('active', p === val || (p === 0 && (isNaN(val) || val === 0)));
+    });
+  }
+
+  function switchInputMode(m) {
+    inputMode = m;
+    document.getElementById('tab-bulk').classList.toggle('active', m === 'bulk');
+    document.getElementById('tab-single').classList.toggle('active', m === 'single');
+    document.getElementById('input-bulk-wrap').classList.toggle('hidden', m !== 'bulk');
+    document.getElementById('input-single-wrap').classList.toggle('hidden', m !== 'single');
+  }
+
+  function updateUrlCounter() {
+    const text = document.getElementById('bulk-reel-urls').value;
+    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 5);
+    const badge = document.getElementById('url-counter-badge');
+    badge.textContent = `${lines.length} URL${lines.length === 1 ? '' : 's'} detected`;
+    badge.style.color = lines.length > 0 ? '#86efac' : 'var(--muted)';
+  }
+
+  function setSafety(mode) {
+    currentSafety = mode;
+    ['ultra','balanced','turbo'].forEach(m => {
+      document.getElementById(`preset-${m}`).classList.toggle('active', m === mode);
+    });
+  }
+
+  function setDeepMode(deep) {
+    isDeepMode = deep;
+    document.getElementById('mode-fast').classList.toggle('active', !deep);
+    document.getElementById('mode-deep').classList.toggle('active', deep);
+  }
 
   function setAlert(id, type, html) {
     const el = document.getElementById(id);
@@ -272,10 +444,12 @@
     el.classList.remove('hidden');
   }
   function clearAlert(id) { const el = document.getElementById(id); el.classList.add('hidden'); el.innerHTML = ''; }
+
   function showSection(id) {
     ['section-login','section-scrape','section-results'].forEach(s =>
       document.getElementById(s).classList.toggle('hidden', s !== id));
   }
+
   function setStep(n) {
     for (let i = 1; i <= 3; i++) {
       const s = document.getElementById(`step${i}`), num = document.getElementById(`s${i}`);
@@ -287,84 +461,112 @@
   }
 
   // ── Login ──────────────────────────────────────────────────────
-
   async function doLogin() {
-    const sid = document.getElementById('ig-sessionid').value.trim();
-    if (!sid) { setAlert('login-alert','error','❌ Please paste your Instagram Session ID.'); return; }
-    if (sid.length < 20) { setAlert('login-alert','error','❌ That doesn\'t look like a valid session ID. It should be a long string.'); return; }
+    const sids = document.getElementById('ig-sessionids').value.trim();
+    const proxy = document.getElementById('ig-proxy').value.trim();
+
+    if (!sids) {
+      setAlert('login-alert','error','❌ Please paste at least one Instagram Session ID.');
+      return;
+    }
 
     clearAlert('login-alert');
     const btn = document.getElementById('login-btn');
     btn.disabled = true;
-    btn.innerHTML = '<div class="spinner"></div> Connecting…';
+    btn.innerHTML = '<div class="spinner"></div> Connecting &amp; Authenticating…';
 
     try {
-      const res  = await fetch(`${API}/api/login`, {
+      const res = await fetch(`${API}/api/login`, {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ sessionid: sid }),
+        body: JSON.stringify({ sessionid: sids, proxy: proxy || null }),
       });
       const data = await res.json();
 
       if (!res.ok) {
-        setAlert('login-alert','error','❌ ' + (data.detail || 'Connection failed.'));
+        setAlert('login-alert','error','❌ ' + (data.detail || 'Connection failed. Please verify your session cookie.'));
         btn.disabled = false;
-        btn.innerHTML = '🔌 Connect to Instagram';
+        btn.innerHTML = '🔌 Connect &amp; Verify Accounts';
         return;
       }
 
       sessionId = data.session_id;
-      const username = data.username || 'Instagram User';
+      const accounts = data.accounts || [{ username: data.username, status: 'active' }];
 
-      // Show logged-in state
-      document.getElementById('nav-user').textContent = `✅ @${username}`;
+      // Display Connected Accounts
+      const tagsContainer = document.getElementById('account-tags');
+      tagsContainer.innerHTML = accounts.map(a =>
+        `<span class="account-tag">🟢 @${escHtml(a.username)} (${a.status})</span>`
+      ).join('');
+
+      document.getElementById('nav-user').textContent = `✅ Connected (${accounts.length} acc)`;
       document.getElementById('nav-user').classList.remove('hidden');
       document.getElementById('nav-logout').classList.remove('hidden');
-      document.getElementById('logged-in-user').textContent = `@${username}`;
-      document.getElementById('logged-in-banner').classList.remove('hidden');
 
       setStep(2);
       showSection('section-scrape');
     } catch(e) {
-      setAlert('login-alert','error',
-        '❌ Cannot reach local server. Make sure <code>start.bat</code> is running, then refresh this page.');
+      setAlert('login-alert','error', '❌ Cannot reach backend server. Make sure the FastAPI server is running at http://127.0.0.1:8000.');
       btn.disabled = false;
-      btn.innerHTML = '🔌 Connect to Instagram';
+      btn.innerHTML = '🔌 Connect &amp; Verify Accounts';
     }
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('ig-sessionid').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doLogin();
-    });
-  });
-
   // ── Scrape ─────────────────────────────────────────────────────
-
   async function doScrape() {
-    const reelUrl     = document.getElementById('reel-url').value.trim();
-    const maxComments = parseInt(document.getElementById('max-comments').value) || 300;
+    let urls = [];
+    if (inputMode === 'bulk') {
+      const text = document.getElementById('bulk-reel-urls').value;
+      urls = text.split('\n').map(l => l.trim()).filter(l => l.length > 5);
+    } else {
+      const single = document.getElementById('single-reel-url').value.trim();
+      if (single) urls = [single];
+    }
+
+    if (!urls.length) {
+      setAlert('scrape-alert','error','❌ Please paste at least one Instagram Reel URL.');
+      return;
+    }
+
+    const maxCommentsInput = document.getElementById('max-comments').value.trim();
+    const maxComments = maxCommentsInput === '' ? 0 : parseInt(maxCommentsInput);
     const minConf     = parseInt(document.getElementById('min-confidence').value) || 25;
 
-    if (!reelUrl) { setAlert('scrape-alert','error','❌ Please paste an Instagram Reel URL.'); return; }
-    if (!reelUrl.includes('instagram.com')) { setAlert('scrape-alert','error','❌ That doesn\'t look like an Instagram URL.'); return; }
-
-    currentReelUrl = reelUrl;
     clearAlert('scrape-alert');
     const btn = document.getElementById('scrape-btn');
     btn.disabled = true;
-    btn.innerHTML = '<div class="spinner"></div> Starting…';
+    const targetLabel = maxComments === 0 ? 'ALL comments' : `${maxComments} comments`;
+    btn.innerHTML = `<div class="spinner"></div> Extracting ${targetLabel} from ${urls.length} Reel${urls.length > 1 ? 's' : ''}…`;
     document.getElementById('progress-section').classList.remove('hidden');
-    updateProgress('Starting scrape…', 2);
+    updateProgress('Initializing Anti-Ban Engine…', 2);
 
     try {
       const res = await fetch(`${API}/api/scrape`, {
-        method: 'POST', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ session_id: sessionId, reel_url: reelUrl, max_comments: maxComments, min_confidence: minConf }),
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          session_id: sessionId,
+          reel_urls: urls,
+          max_comments: maxComments,
+          min_confidence: minConf,
+          deep_mode: isDeepMode,
+          safety_mode: currentSafety,
+        }),
       });
-      if (!res.ok) { const d = await res.json(); setAlert('scrape-alert','error','❌ ' + (d.detail || 'Scrape failed.')); resetScrapeBtn(); return; }
-      pollTimer = setInterval(pollProgress, 1200);
-    } catch(e) { setAlert('scrape-alert','error','❌ Server error.'); resetScrapeBtn(); }
+
+      if (!res.ok) {
+        const d = await res.json();
+        setAlert('scrape-alert','error','❌ ' + (d.detail || 'Scrape initiation failed.'));
+        resetScrapeBtn();
+        return;
+      }
+
+      if (pollTimer) clearInterval(pollTimer);
+      pollTimer = setInterval(pollProgress, 1000);
+    } catch(e) {
+      setAlert('scrape-alert','error','❌ Server error during scrape initiation.');
+      resetScrapeBtn();
+    }
   }
 
   function updateProgress(msg, pct) {
@@ -377,67 +579,109 @@
     try {
       const res = await fetch(`${API}/api/progress/${sessionId}`);
       const data = await res.json();
-      updateProgress(data.message || '…', data.percent || 0);
+      updateProgress(data.message || 'Processing…', data.percent || 0);
+
       if (data.done) {
         clearInterval(pollTimer);
-        if (data.error) { setAlert('scrape-alert','error','❌ ' + data.error); resetScrapeBtn(); }
-        else await loadResults();
+        if (data.error) {
+          setAlert('scrape-alert','error','❌ ' + data.error);
+          resetScrapeBtn();
+        } else {
+          await loadResults();
+        }
       }
     } catch(e) {}
   }
 
-  function resetScrapeBtn() { const btn = document.getElementById('scrape-btn'); btn.disabled = false; btn.innerHTML = '🔍 Start Scraping'; }
+  function resetScrapeBtn() {
+    const btn = document.getElementById('scrape-btn');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = '🚀 Start Bulk Lead Extraction';
+    }
+  }
 
   // ── Results ────────────────────────────────────────────────────
-
   async function loadResults() {
     try {
       const res  = await fetch(`${API}/api/results/${sessionId}`);
       const data = await res.json();
       allLeads = data.leads || [];
-      // Store meta text for use inside the wide layout
-      document.getElementById('results-meta').textContent = `Scanned ${data.total_comments || 0} comments · Found ${allLeads.length} business leads`;
+
       setStep(3);
       showSection('section-results');
-      renderLeads(allLeads);
-      // Scroll to results
+      renderResults(data);
       document.getElementById('section-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-      // Automatically start Excel download if leads are found!
+      // Automatically trigger download if leads exist!
       if (allLeads.length > 0) {
-        setTimeout(() => {
-          downloadExcel(true);
-        }, 500);
+        setTimeout(() => { downloadExcel(true); }, 700);
       }
-    } catch(e) { setAlert('scrape-alert','error','❌ Failed to load results.'); resetScrapeBtn(); }
+    } catch(e) {
+      setAlert('scrape-alert','error','❌ Failed to retrieve results from server.');
+      resetScrapeBtn();
+    }
   }
 
-  function scoreClass(s) { return s >= 70 ? 'score-high' : s >= 40 ? 'score-medium' : 'score-low'; }
+  function scoreClass(s) { return s >= 65 ? 'score-high' : s >= 40 ? 'score-medium' : 'score-low'; }
+  function cleanWaDigits(phone) { return phone.replace(/\D/g, ''); }
 
-  function renderLeads(leads) {
+  function renderResults(data) {
     const section = document.getElementById('section-results');
+    const leads = data.leads || [];
+    const totalComments = data.total_comments || 0;
+    const totalReels = data.total_reels || 1;
+    const totalCommenters = data.total_commenters || leads.length;
+
     if (!leads.length) {
-      section.innerHTML = `<div class="container"><div class="card"><div class="empty-state"><div class="empty-icon">🔍</div><div>No business leads found in those comments.<br/>Try lowering the Confidence Score threshold and scraping again.</div></div></div></div>`;
+      section.innerHTML = `
+        <div class="container">
+          <div class="card">
+            <div class="empty-state">
+              <div class="empty-icon">🔍</div>
+              <div style="font-size:1.15rem;font-weight:700;margin-bottom:8px;">No business leads detected</div>
+              <div style="font-size:.88rem;color:var(--muted);max-width:500px;margin:0 auto 20px;">
+                We scanned ${totalComments} comments across ${totalReels} Reel(s), but none met the minimum confidence score threshold.
+              </div>
+              <button class="btn btn-secondary" onclick="resetToScrape()">🔄 Try Again with Lower Confidence</button>
+            </div>
+          </div>
+        </div>`;
       return;
     }
 
-    const cards = leads.map((l, i) => {
-      const phones  = l.phones.length  ? l.phones.map(p  => `<span>${escHtml(p)}</span> <button class="copy-btn" onclick="copy('${escHtml(p)}',this)" title="Copy">⧉</button>`).join('<br/>') : `<span class="field-dash">—</span>`;
-      const emails  = l.emails.length  ? l.emails.map(e  => `<a href="mailto:${escHtml(e)}">${escHtml(e)}</a>`).join('<br/>') : `<span class="field-dash">—</span>`;
-      const websites= l.websites.length? l.websites.map(w => `<a href="${w.startsWith('http')?w:'https://'+w}" target="_blank" rel="noopener">${escHtml(w.length>45?w.slice(0,45)+'…':w)}</a>`).join('<br/>') : `<span class="field-dash">—</span>`;
-      const bio     = l.comment_text ? escHtml(l.comment_text).replace(/\n/g,'<br/>') : `<span class="field-dash">—</span>`;
+    const cardsHtml = leads.map((l, i) => {
+      const phones = l.phones.length ? l.phones.map(p => {
+        const digits = cleanWaDigits(p);
+        const waLink = digits.length >= 10 ? `<a href="https://wa.me/${digits}" target="_blank" class="wa-btn" title="Open WhatsApp Chat">💬 WhatsApp</a>` : '';
+        return `<span>${escHtml(p)}</span> <button class="copy-btn" onclick="copy('${escHtml(p)}',this)" title="Copy Number">⧉</button>${waLink}`;
+      }).join('<br/>') : `<span class="field-dash">—</span>`;
+
+      const emails = l.emails.length ? l.emails.map(e =>
+        `<a href="mailto:${escHtml(e)}">${escHtml(e)}</a> <button class="copy-btn" onclick="copy('${escHtml(e)}',this)" title="Copy Email">⧉</button>`
+      ).join('<br/>') : `<span class="field-dash">—</span>`;
+
+      const websites = l.websites.length ? l.websites.map(w => {
+        const href = w.startsWith('http') ? w : 'https://' + w;
+        return `<a href="${href}" target="_blank" rel="noopener">${escHtml(w.length > 36 ? w.slice(0, 36) + '…' : w)}</a>`;
+      }).join('<br/>') : `<span class="field-dash">—</span>`;
+
+      const sourceLink = l.source_url ? `<a href="${escHtml(l.source_url)}" target="_blank" class="source-badge">🎬 View Reel ↗</a>` : '';
+      const commentSnippet = l.comment_text ? escHtml(l.comment_text).replace(/\n/g, '<br/>') : `<span class="field-dash">—</span>`;
+      const reasons = l.detection_reasons && l.detection_reasons.length ? l.detection_reasons.map(r => `<span style="display:inline-block;background:var(--surface3);padding:2px 8px;border-radius:12px;font-size:.72rem;margin-right:4px;margin-bottom:4px;color:#cbd5e1;">${escHtml(r)}</span>`).join('') : '';
 
       return `
       <div class="lead-card" id="lead-${i}">
         <div class="lead-card-top">
           <div>
             <div class="lead-name">${escHtml(l.commenter_name)}</div>
-            <div class="lead-handle">${escHtml(l.instagram_handle)}</div>
+            <div class="lead-handle"><a href="https://instagram.com/${escHtml(l.instagram_handle.replace('@',''))}" target="_blank">${escHtml(l.instagram_handle)}</a></div>
           </div>
           <span class="score-pill ${scoreClass(l.confidence_score)}">${l.confidence_score}% match</span>
         </div>
         <div class="lead-divider"></div>
         <div class="lead-fields">
+          ${l.category ? `<div class="lead-field"><span class="lead-field-icon">🏢</span><span class="lead-field-label">Category</span><span class="lead-field-value" style="color:#86efac;font-weight:600;">${escHtml(l.category)}</span></div>` : ''}
           <div class="lead-field">
             <span class="lead-field-icon">📞</span>
             <span class="lead-field-label">Phone</span>
@@ -454,113 +698,166 @@
             <span class="lead-field-value">${websites}</span>
           </div>
           <div class="lead-field">
-            <span class="lead-field-icon">📋</span>
-            <span class="lead-field-label">Bio</span>
-            <span class="lead-field-value bio-val">${bio}</span>
+            <span class="lead-field-icon">🎬</span>
+            <span class="lead-field-label">Source</span>
+            <span class="lead-field-value">${sourceLink || '<span class="field-dash">—</span>'}</span>
           </div>
+          <div class="lead-field">
+            <span class="lead-field-icon">💬</span>
+            <span class="lead-field-label">Comment</span>
+            <span class="lead-field-value bio-val">${commentSnippet}</span>
+          </div>
+          ${reasons ? `<div style="margin-top:4px;display:flex;flex-wrap:wrap;">${reasons}</div>` : ''}
         </div>
       </div>`;
     }).join('');
 
     section.innerHTML = `
       <div class="container-wide">
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px 28px;margin-bottom:20px;">
+        <div class="results-banner">
           <div class="results-header">
             <div>
-              <div style="font-size:1.1rem;font-weight:700;margin-bottom:4px;">🏢 Business Leads Found</div>
-              <div id="results-meta-inner" style="font-size:.82rem;color:var(--muted);"></div>
+              <div style="font-size:1.25rem;font-weight:800;letter-spacing:-.5px;">🏢 Extracted Business Leads (${leads.length})</div>
+              <div class="metric-pills">
+                <div class="metric-pill"><strong>${totalReels}</strong> Reels Scanned</div>
+                <div class="metric-pill"><strong>${totalComments}</strong> Comments Analyzed</div>
+                <div class="metric-pill"><strong>${totalCommenters}</strong> Unique Commenters</div>
+                <div class="metric-pill"><strong>${leads.filter(l => l.phones.length > 0).length}</strong> With Phone / WhatsApp</div>
+              </div>
             </div>
             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-              <span class="results-count" id="leads-count-inner">0 leads</span>
-              <input class="search-input" type="text" placeholder="🔍 Filter leads…" oninput="filterLeads(this.value)" style="max-width:220px;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:inherit;font-size:.85rem;outline:none;" />
-              <button id="download-btn" class="btn btn-success" onclick="downloadExcel()">📥 Download Excel</button>
+              <input type="text" placeholder="🔍 Search handle, phone, keyword…" oninput="filterLeads(this.value)" style="max-width:240px;padding:9px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:inherit;font-size:.85rem;outline:none;" />
+              <button id="download-btn" class="btn btn-success" onclick="downloadExcel()">📥 Download Master Excel</button>
               <button class="btn btn-secondary" onclick="resetToScrape()">🔄 New Scrape</button>
             </div>
           </div>
         </div>
-        <div class="leads-grid" id="leads-grid">${cards}</div>
+        <div class="leads-grid" id="leads-grid">${cardsHtml}</div>
       </div>`;
-
-    // Update meta
-    const metaEl = document.getElementById('results-meta-inner');
-    const countEl = document.getElementById('leads-count-inner');
-    if (metaEl) metaEl.textContent = document.getElementById('results-meta').textContent;
-    if (countEl) countEl.textContent = `${leads.length} leads`;
   }
 
-  // Keep filterTable alias for the inline oninput
-  function filterTable(q) { filterLeads(q); }
   function filterLeads(q) {
     q = q.toLowerCase();
     const filtered = q ? allLeads.filter(l =>
       l.commenter_name.toLowerCase().includes(q) || l.instagram_handle.toLowerCase().includes(q) ||
+      (l.category && l.category.toLowerCase().includes(q)) ||
       l.phones.some(p => p.includes(q)) || l.emails.some(e => e.toLowerCase().includes(q)) ||
       l.websites.some(w => w.toLowerCase().includes(q)) ||
       (l.comment_text || '').toLowerCase().includes(q)
     ) : allLeads;
-    // Re-render just the grid cards
+
     const grid = document.getElementById('leads-grid');
-    if (!grid) { renderLeads(filtered); return; }
-    const cards = filtered.map((l, i) => {
-      const phones  = l.phones.length  ? l.phones.map(p  => `<span>${escHtml(p)}</span> <button class="copy-btn" onclick="copy('${escHtml(p)}',this)">⧉</button>`).join('<br/>') : `<span class="field-dash">—</span>`;
-      const emails  = l.emails.length  ? l.emails.map(e  => `<a href="mailto:${escHtml(e)}">${escHtml(e)}</a>`).join('<br/>') : `<span class="field-dash">—</span>`;
-      const websites= l.websites.length? l.websites.map(w => `<a href="${w.startsWith('http')?w:'https://'+w}" target="_blank" rel="noopener">${escHtml(w.length>45?w.slice(0,45)+'…':w)}</a>`).join('<br/>') : `<span class="field-dash">—</span>`;
-      const bio     = l.comment_text ? escHtml(l.comment_text).replace(/\n/g,'<br/>') : `<span class="field-dash">—</span>`;
-      return `<div class="lead-card">
-        <div class="lead-card-top"><div><div class="lead-name">${escHtml(l.commenter_name)}</div><div class="lead-handle">${escHtml(l.instagram_handle)}</div></div><span class="score-pill ${scoreClass(l.confidence_score)}">${l.confidence_score}% match</span></div>
+    if (!grid) return;
+
+    if (!filtered.length) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="empty-icon">🔍</div><div>No leads match your search query.</div></div>`;
+      return;
+    }
+
+    grid.innerHTML = filtered.map((l, i) => {
+      const phones = l.phones.length ? l.phones.map(p => {
+        const digits = cleanWaDigits(p);
+        const waLink = digits.length >= 10 ? `<a href="https://wa.me/${digits}" target="_blank" class="wa-btn">💬 WhatsApp</a>` : '';
+        return `<span>${escHtml(p)}</span> <button class="copy-btn" onclick="copy('${escHtml(p)}',this)">⧉</button>${waLink}`;
+      }).join('<br/>') : `<span class="field-dash">—</span>`;
+
+      const emails = l.emails.length ? l.emails.map(e =>
+        `<a href="mailto:${escHtml(e)}">${escHtml(e)}</a> <button class="copy-btn" onclick="copy('${escHtml(e)}',this)">⧉</button>`
+      ).join('<br/>') : `<span class="field-dash">—</span>`;
+
+      const websites = l.websites.length ? l.websites.map(w => {
+        const href = w.startsWith('http') ? w : 'https://' + w;
+        return `<a href="${href}" target="_blank" rel="noopener">${escHtml(w.length > 36 ? w.slice(0, 36) + '…' : w)}</a>`;
+      }).join('<br/>') : `<span class="field-dash">—</span>`;
+
+      const sourceLink = l.source_url ? `<a href="${escHtml(l.source_url)}" target="_blank" class="source-badge">🎬 View Reel ↗</a>` : '';
+      const commentSnippet = l.comment_text ? escHtml(l.comment_text).replace(/\n/g, '<br/>') : `<span class="field-dash">—</span>`;
+
+      return `
+      <div class="lead-card">
+        <div class="lead-card-top">
+          <div>
+            <div class="lead-name">${escHtml(l.commenter_name)}</div>
+            <div class="lead-handle"><a href="https://instagram.com/${escHtml(l.instagram_handle.replace('@',''))}" target="_blank">${escHtml(l.instagram_handle)}</a></div>
+          </div>
+          <span class="score-pill ${scoreClass(l.confidence_score)}">${l.confidence_score}% match</span>
+        </div>
         <div class="lead-divider"></div>
         <div class="lead-fields">
+          ${l.category ? `<div class="lead-field"><span class="lead-field-icon">🏢</span><span class="lead-field-label">Category</span><span class="lead-field-value" style="color:#86efac;font-weight:600;">${escHtml(l.category)}</span></div>` : ''}
           <div class="lead-field"><span class="lead-field-icon">📞</span><span class="lead-field-label">Phone</span><span class="lead-field-value">${phones}</span></div>
           <div class="lead-field"><span class="lead-field-icon">📧</span><span class="lead-field-label">Email</span><span class="lead-field-value">${emails}</span></div>
           <div class="lead-field"><span class="lead-field-icon">🌐</span><span class="lead-field-label">Website</span><span class="lead-field-value">${websites}</span></div>
-          <div class="lead-field"><span class="lead-field-icon">📋</span><span class="lead-field-label">Bio</span><span class="lead-field-value bio-val">${bio}</span></div>
-        </div></div>`;
+          <div class="lead-field"><span class="lead-field-icon">🎬</span><span class="lead-field-label">Source</span><span class="lead-field-value">${sourceLink || '<span class="field-dash">—</span>'}</span></div>
+          <div class="lead-field"><span class="lead-field-icon">💬</span><span class="lead-field-label">Comment</span><span class="lead-field-value bio-val">${commentSnippet}</span></div>
+        </div>
+      </div>`;
     }).join('');
-    grid.innerHTML = cards || `<div class="empty-state"><div class="empty-icon">🔍</div><div>No leads match your filter.</div></div>`;
-    const ci = document.getElementById('leads-count-inner');
-    if (ci) ci.textContent = `${filtered.length} leads`;
   }
 
   async function downloadExcel(isAuto = false) {
     const btn = document.getElementById('download-btn');
     if (btn) {
       btn.disabled = true;
-      btn.innerHTML = isAuto ? '<div class="spinner"></div> Auto-Downloading…' : '<div class="spinner"></div> Generating…';
+      btn.innerHTML = isAuto ? '<div class="spinner"></div> Auto-Downloading…' : '<div class="spinner"></div> Generating Excel…';
     }
     try {
-      const res = await fetch(`${API}/api/download/${sessionId}?reel_url=${encodeURIComponent(currentReelUrl)}`);
+      const res = await fetch(`${API}/api/download/${sessionId}`);
       if (!res.ok) throw new Error();
       const blob = await res.blob();
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `business_leads_${new Date().toISOString().slice(0,10)}.xlsx`;
+      a.download = `IG_Business_Leads_${new Date().toISOString().slice(0,10)}.xlsx`;
       a.click();
       if (btn) {
         btn.disabled = false;
         btn.innerHTML = '✅ Excel Downloaded!';
-        setTimeout(() => { if (btn) btn.innerHTML = '📥 Download Excel'; }, 3500);
+        setTimeout(() => { if (btn) btn.innerHTML = '📥 Download Master Excel'; }, 3500);
       }
     } catch(e) {
-      if (!isAuto) alert('Download failed. Please try again.');
-      if (btn) { btn.disabled = false; btn.innerHTML = '📥 Download Excel'; }
+      if (!isAuto) alert('Excel generation failed. Please try again.');
+      if (btn) { btn.disabled = false; btn.innerHTML = '📥 Download Master Excel'; }
     }
   }
 
-  function copy(text, btn) { navigator.clipboard.writeText(text).then(() => { const o = btn.textContent; btn.textContent = '✓'; setTimeout(() => btn.textContent = o, 1500); }); }
-  function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-  function resetToScrape() {
-    allLeads = []; document.getElementById('progress-section').classList.add('hidden');
-    updateProgress('',0); clearAlert('scrape-alert'); resetScrapeBtn(); setStep(2); showSection('section-scrape');
+  function copy(text, btn) {
+    navigator.clipboard.writeText(text).then(() => {
+      const o = btn.textContent;
+      btn.textContent = '✓';
+      setTimeout(() => btn.textContent = o, 1500);
+    });
   }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function resetToScrape() {
+    allLeads = [];
+    document.getElementById('progress-section').classList.add('hidden');
+    updateProgress('', 0);
+    clearAlert('scrape-alert');
+    resetScrapeBtn();
+    setStep(2);
+    showSection('section-scrape');
+  }
+
   async function logout() {
-    if (sessionId) { fetch(`${API}/api/logout/${sessionId}`).catch(()=>{}); sessionId = null; }
-    clearInterval(pollTimer); allLeads = [];
+    if (sessionId) {
+      fetch(`${API}/api/logout/${sessionId}`).catch(() => {});
+      sessionId = null;
+    }
+    if (pollTimer) clearInterval(pollTimer);
+    allLeads = [];
     document.getElementById('nav-user').classList.add('hidden');
     document.getElementById('nav-logout').classList.add('hidden');
-    document.getElementById('ig-sessionid').value = '';
-    resetLoginBtn(); clearAlert('login-alert'); setStep(1); showSection('section-login');
+    document.getElementById('ig-sessionids').value = '';
+    const btn = document.getElementById('login-btn');
+    if (btn) { btn.disabled = false; btn.innerHTML = '🔌 Connect &amp; Verify Accounts'; }
+    clearAlert('login-alert');
+    setStep(1);
+    showSection('section-login');
   }
-  function resetLoginBtn() { const btn = document.getElementById('login-btn'); btn.disabled = false; btn.innerHTML = '🔌 Connect to Instagram'; }
 </script>
 </body>
 </html>
